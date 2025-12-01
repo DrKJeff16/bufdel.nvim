@@ -1,3 +1,95 @@
 # bufdel.nvim
 
-a simple neovim plugin to delete buffers
+bufdel.nvim is a neovim plugin that helps you delete buffers without changing windows layout.
+
+[![GitHub License](https://img.shields.io/github/license/wsdjeg/bufdel.nvim)](LICENSE)
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/wsdjeg/bufdel.nvim)](https://github.com/wsdjeg/bufdel.nvim/issues)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/wsdjeg/bufdel.nvim)](https://github.com/wsdjeg/bufdel.nvim/commits/master/)
+[![GitHub Release](https://img.shields.io/github/v/release/wsdjeg/bufdel.nvim)](https://github.com/wsdjeg/bufdel.nvim/releases)
+[![luarocks](https://img.shields.io/luarocks/v/wsdjeg/bufdel.nvim)](https://luarocks.org/modules/wsdjeg/bufdel.nvim)
+
+<!-- vim-markdown-toc GFM -->
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [User Autocmds](#user-autocmds)
+- [Credits](#credits)
+- [Self-Promotion](#self-promotion)
+- [License](#license)
+
+<!-- vim-markdown-toc -->
+
+## Installation
+
+Using [nvim-plug](https://github.com/wsdjeg/nvim-plug)
+
+```lua
+require('plug').add({
+    'wsdjeg/bufdel.nvim',
+})
+```
+
+## Usage
+
+1. delete a specific buffer:
+
+```lua
+require("bufdel").delete(2, { wipe = true })
+```
+
+2. delete more than one buffers:
+
+```lua
+require("bufdel").delete({ 2, 3, 5 }, { wipe = true })
+```
+
+3. delete buffers with filter function:
+
+```lua
+require("bufdel").delete(function(buf)
+	if not vim.o[buf].modified and vim.o[buf].buflisted then
+		return true
+	end
+end, { wipe = true })
+```
+
+## User Autocmds
+
+bufdel.nvim triggers two user autocmds when delete a buffer, `User BufDelPro` and `User BufDelPost`. here is an example to handled these events:
+
+```lua
+local mygroup = vim.api.nvim_create_augroup("bufdel_custom", { clear = true })
+vim.api.nvim_create_autocmd({ "User" }, {
+	group = mygroup,
+	pattern = "BufDelPro",
+	callback = function(ev)
+        --- the deleted buffer number is saved in ev.data.buf
+    end,
+})
+vim.api.nvim_create_autocmd({ "User" }, {
+	group = mygroup,
+	pattern = "BufDelPost",
+	callback = function(ev)
+        --- the deleted buffer number is saved in ev.data.buf
+    end,
+})
+```
+
+
+## Credits
+
+- [bufdelete.nvim](https://github.com/famiu/bufdelete.nvim)
+- [Snacks.bufdelete](https://github.com/folke/snacks.nvim/blob/main/docs/bufdelete.md)
+- [nvim-bufdel](https://github.com/ojroques/nvim-bufdel)
+
+## Self-Promotion
+
+Like this plugin? Star the repository on
+GitHub.
+
+Love this plugin? Follow [me](https://wsdjeg.net/) on
+[GitHub](https://github.com/wsdjeg).
+
+## License
+
+This project is licensed under the GPL-3.0 License.

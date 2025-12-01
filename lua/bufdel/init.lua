@@ -14,8 +14,10 @@ end
 
 ---@param buffers table<integer>
 local function delete_buf(buffers, opt)
-    local alt_buf = lastused_buf(buffers)
-    if not alt_buf then alt_buf = vim.api.nvim_create_buf(true, false)
+	local alt_buf = lastused_buf(buffers)
+	if not alt_buf then
+		alt_buf = vim.api.nvim_create_buf(true, false)
+	end
 	for _, buf in ipairs(buffers) do
 		if vim.o[buf].modified then
 			vim.api.nvim_echo({
@@ -36,10 +38,12 @@ local function delete_buf(buffers, opt)
 				}, false, {})
 			end
 		else
-            for _, w in ipairs(vim.fn.win_findbuf(buf)) do
-                vim.api.nvim_win_set_buf(w, alt_buf)
-            end
-			vim.api.nvim_buf_delete(buf, {})
+			for _, w in ipairs(vim.fn.win_findbuf(buf)) do
+				vim.api.nvim_win_set_buf(w, alt_buf)
+			end
+			vim.api.nvim_exec_autocmds("User", { pattern = "BufDelPro", data = { buf = buf } })
+			vim.api.nvim_buf_delete(buf, { unload = not opt.wipe })
+			vim.api.nvim_exec_autocmds("User", { pattern = "BufDelPost", data = { buf = buf } })
 		end
 	end
 end
@@ -48,13 +52,13 @@ function M.delete(buf, opt)
 	if type(buf) == "number" then
 		delete_buf(buf, opt)
 	elseif type(buf) == "function" then
-        local del_bufs = {}
+		local del_bufs = {}
 		for _, v in ipairs(vim.api.nvim_list_bufs()) do
 			if buf(v) then
-                table.insert(del_bufs, v)
+				table.insert(del_bufs, v)
 			end
 		end
-        delete_buf(del_bufs, opt)
+		delete_buf(del_bufs, opt)
 	end
 end
 
